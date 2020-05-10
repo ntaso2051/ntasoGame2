@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>アニメーション</title>
+  </head>
+
+  <body>
+    <div id="game"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.2.1/pixi.min.js"></script>
+    <script type="text/javascript">
+      // pixiアプリケーションのインスタンスを生成
+      const pixiApp = new PIXI.Application({
+        width: 512,
+        height: 512,
+        antialiasing: true,
+        transparent: false,
+        resolution: 1,
+      });
+
+      let gameScene; // ゲームシーン
+      let dungeon; // ダンジョン背景
+      let anim1; // キャラアイコン
+
+      // #game要素にpixiApp.view追加
+      document.querySelector("#game").appendChild(pixiApp.view);
+
+      PIXI.Loader.shared
+        .add("chara-1", "./img/player1.png")
+        .add("chara-2", "./img/player2.png")
+        .add("chara-3", "./img/player3.png")
+        .add("dungeon", "https://i.imgur.com/EzpxVBZ.png")
+        .load(setup);
+
+      function setup(loader, res) {
+        gameScene = new PIXI.Container();
+        pixiApp.stage.addChild(gameScene);
+
+        dungeon = new PIXI.Sprite(PIXI.utils.TextureCache["dungeon"]);
+        gameScene.addChild(dungeon);
+        anim1 = createAnim(["chara-1", "chara-2", "chara-3"]);
+        anim1.x = gameScene.width / 2 - anim1.width;
+        anim1.y = gameScene.height / 2 - anim1.height / 2;
+        anim1.vx = 0;
+        anim1.vy = 0;
+        anim1.play();
+        gameScene.addChild(anim1);
+      }
+
+      pixiApp.ticker.add((delta) => this.gameloop(delta, anim1));
+
+      function createAnim(imgs, opts) {
+        const textureArray = [];
+        for (let i = 0; i < imgs.length; i++) {
+          let texture = PIXI.Texture.from(imgs[i]);
+          textureArray.push(texture);
+        }
+        const animatedSprite = new PIXI.AnimatedSprite(textureArray);
+        animatedSprite.animationSpeed =
+          opts && opts.animationSpeed ? opts.animationSpeed : 0.1;
+        return animatedSprite;
+      }
+
+      let keyFlag = 0;
+      let playerSpeed = 2;
+
+      window.addEventListener(
+        "keydown",
+        (event) => {
+          this.downHandler(event);
+        },
+        false
+      );
+      window.addEventListener(
+        "keyup",
+        (event) => {
+          this.upHandler(event);
+        },
+        false
+      );
+
+      function downHandler(event) {
+        switch (event.key) {
+          case "ArrowRight":
+            keyFlag = 1;
+            break;
+          case "ArrowLeft":
+            keyFlag = 2;
+            break;
+          case "ArrowDown":
+            keyFlag = 3;
+            break;
+          case "ArrowUp":
+            keyFlag = 4;
+            console.log(keyFlag);
+            break;
+        }
+      }
+
+      function upHandler(event) {
+        keyFlag = 0;
+      }
+      function gameloop(delta, square) {
+        switch (keyFlag) {
+          case 1:
+            anim1.x += playerSpeed;
+            break;
+          case 2:
+            anim1.x -= playerSpeed;
+            break;
+          case 3:
+            anim1.y += playerSpeed;
+            break;
+          case 4:
+            anim1.y -= playerSpeed;
+            break;
+          default:
+            break;
+        }
+      }
+    </script>
+  </body>
+</html>
